@@ -1,0 +1,21 @@
+# Python and notebooks
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Local dataset and trained artifacts
+# Remove individual patterns only if redistribution is explicitly permitted.
+Data/
+data/
+*.csv
+models/
+*.joblib
+*.pkl
+
+# OS/editor
+.DS_Store
+.vscode/
+.env
