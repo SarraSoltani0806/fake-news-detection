@@ -1,144 +1,97 @@
-# Fake News Detection with Machine Learning
+# Fake News Detection — Data Science Learning Project
 
-A Natural Language Processing (NLP) classification project that predicts whether a news article belongs to the **REAL** or **FAKE** class using **TF-IDF** features and one linear classifier trained with the **Passive-Aggressive** learning algorithm.
+A hands-on **Data Science and Natural Language Processing (NLP)** project exploring text feature extraction, supervised classification, and model evaluation. The goal is to classify articles as `FAKE` or `REAL` using **TF-IDF** features and a single **Passive–Aggressive learning algorithm**.
 
-> **Important:** The model learns patterns in labeled articles; it does **not** independently fact-check claims or establish whether a news story is true.
-
-## Project overview
-
-This project follows an end-to-end supervised machine learning workflow:
-
-1. Explore and inspect the news dataset with Pandas.
-2. Check missing data, label distribution, text lengths, and duplicates.
-3. Prepare the `text` feature and `label` target.
-4. Split the data into training (80%) and testing (20%) sets, stratified by label.
-5. Learn TF-IDF features **from the training set only** to avoid leakage.
-6. Train a single Passive-Aggressive linear classifier.
-7. Evaluate on held-out data using accuracy, precision, recall, F1-score, and a confusion matrix.
-8. Inspect classification errors and influential TF-IDF features.
+This is a learning exercise, not a fact-checking service: the classifier learns patterns in the training data and does not verify the truth of an article.
 
 ## Dataset
 
-The working dataset contains **20,000 articles** after cleaning, with two modeling columns:
+The cleaned dataset contains **20,000 articles** and two modeling columns:
 
-| Column | Description |
-| --- | --- |
-| `text` | News article content (model input) |
-| `label` | `REAL` or `FAKE` (prediction target) |
+- `text`: article content (input)
+- `label`: `FAKE` or `REAL` (target)
 
-The initial dataset also includes `title`, `date`, `source`, `author`, and `category`; the modeling baseline uses **only article text**. During exploration, `source` and `author` each had 1,000 missing values, but these fields were not required for this baseline. Checks found no exact duplicate texts or identical texts with conflicting labels.
+Exploratory analysis covered class distribution, article lengths, missing values and duplicates. The original `source` and `author` columns contained missing values and were not used as features. No conflicting labels were found for identical texts in the cleaned dataset.
 
-**Data provenance:** Add the original dataset URL, creator, and license here before publishing or redistributing the dataset. If its redistribution terms are unclear, keep the CSV out of Git and document how to obtain it.
+## Methodology
 
-## Approach
+1. **Exploratory data analysis:** inspect data structure, class distribution, missing values, duplicates and text lengths.
+2. **Data preprocessing:** select article text and labels; remove invalid or duplicate observations.
+3. **Train/test split:** stratified 80/20 split (16,000 / 4,000 articles).
+4. **Feature extraction:** use `TfidfVectorizer` to convert articles into numerical vectors (**763 features** in this experiment). Fit the vectorizer only on the training data to avoid test leakage.
+5. **Classification:** train one linear classifier using the **Passive–Aggressive (PA-I)** update rule, implemented with `SGDClassifier(loss='hinge', penalty=None, learning_rate='pa1', eta0=1.0)`.
+6. **Evaluation:** analyze accuracy, per-class precision/recall/F1, the confusion matrix, misclassified examples and influential vocabulary features.
 
-```text
-Labeled news articles
-        |
-        v
-Data inspection & cleaning
-        |
-        v
-Stratified train/test split (80/20)
-        |
-        v
-TF-IDF vectorization
-(fit on training data; transform test data)
-        |
-        v
-Passive-Aggressive classifier
-        |
-        v
-Predictions: REAL / FAKE
-        |
-        v
-Evaluation and error analysis
-```
+## Results
 
-### TF-IDF
+Evaluation on **4,000 held-out articles**:
 
-`TfidfVectorizer` represents each article as a sparse numerical feature vector. It upweights terms that distinguish a document from others in the training corpus. The baseline uses English stop-word filtering and `max_df=0.7` (excludes terms appearing in more than 70% of training documents).
+| Metric | Value |
+| --- | ---: |
+| Accuracy | **50.42%** |
+| Macro F1-score | **0.48** |
+| Correct predictions | **2,017** |
+| Incorrect predictions | **1,983** |
 
-### Classifier
+### Classification report
 
-One classifier is used throughout: a **Passive-Aggressive linear classifier**. It adjusts the decision boundary when examples violate the classification margin and otherwise leaves the weights unchanged.
+| Class | Precision | Recall | F1-score | Support |
+| --- | ---: | ---: | ---: | ---: |
+| FAKE | 0.50 | 0.71 | 0.59 | 2,011 |
+| REAL | 0.50 | 0.29 | 0.37 | 1,989 |
 
-**Compatibility note:** `PassiveAggressiveClassifier` is deprecated in scikit-learn 1.8. For newer versions, the documented PA-I equivalent uses:
+### Confusion matrix
 
-```python
-from sklearn.linear_model import SGDClassifier
+Rows are actual classes; columns are predicted classes.
 
-model = SGDClassifier(
-    loss="hinge",
-    penalty=None,
-    learning_rate="pa1",
-    eta0=1.0,
-    max_iter=1000,
-    random_state=42,
-)
-```
+| Actual / Predicted | FAKE | REAL |
+| --- | ---: | ---: |
+| **FAKE** | 1,436 | 575 |
+| **REAL** | 1,408 | 581 |
 
-This keeps the **same Passive-Aggressive learning approach**; it does not add a second model.
+**Interpretation:** The model identifies many FAKE-labeled articles, but frequently misclassifies REAL-labeled articles as FAKE. Accuracy is only slightly above 50% on this nearly balanced test set, so the current classifier is **a baseline, not a reliable detection system**.
+
+The vocabulary has only 763 features, which is worth investigating along with text quality, dataset characteristics, and the preprocessing pipeline. No improved performance is claimed here.
+
+## Technologies
+
+Python · Jupyter Notebook · pandas · NumPy · Matplotlib · Seaborn · scikit-learn · joblib
+
+## Run locally
+
+1. Clone this repository and open a terminal in its root directory.
+2. Create and activate a virtual environment:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Place the dataset in `Data/` and adjust the CSV path in the notebook if needed.
+5. Start Jupyter and run `fakenewsdetection.ipynb` from top to bottom:
+   ```bash
+   jupyter lab
+   ```
+
+The dataset is not included in the repository by default; ensure that you have permission to redistribute it before publishing it.
 
 ## Project structure
 
 ```text
-fake-news-detection/
+.
+├── Data/                         # local dataset (not committed)
+├── models/                       # locally saved model artifacts
+├── fakenewsdetection.ipynb       # analysis, training and evaluation
 ├── README.md
-├── requirements.txt
-├── .gitignore
-├── fake_news_detection.ipynb   # Add your Jupyter notebook
-├── data/
-│   └── fake_news_dataset.csv   # Local file, ignored by Git
-└── models/                      # Generated model files, ignored by Git
+└── requirements.txt
 ```
 
-## Setup and execution
+## Takeaways and next steps
 
-Prerequisites: Python 3.10+ and JupyterLab or VS Code with the Jupyter extension.
+This exercise covers an end-to-end supervised NLP workflow and illustrates why **error analysis matters more than reporting accuracy alone**. Next steps, while keeping the same single classifier, include inspecting the TF-IDF vocabulary, testing richer text representations (e.g., word n-grams), checking for source or topic shortcuts, and tuning hyperparameters using only the training data.
 
-```bash
-# From the repository directory
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-jupyter lab
-```
+## Learning resource
 
-Open `fake_news_detection.ipynb` and run all cells in order. Update the CSV path in the notebook to match where you saved your dataset, for example:
-
-```python
-import pandas as pd
-
-df = pd.read_csv("data/fake_news_dataset.csv")
-```
-
-## Evaluation
-
-The training run shown in development used **763 TF-IDF features** and completed in **10 passes** over the training data. These figures describe training, **not prediction quality**.
-
-Fill in the following table after evaluating on the held-out test set; results have not yet been provided:
-
-| Metric | Test result |
-| --- | --- |
-| Accuracy | _To be measured_ |
-| Precision (FAKE) | _To be measured_ |
-| Recall (FAKE) | _To be measured_ |
-| F1-score (FAKE) | _To be measured_ |
-
-Also include your confusion matrix plot and a short analysis of false positives and false negatives.
-
-## Limitations and next steps
-
-- Predictions reflect patterns in the training labels, not independent verification of factual claims.
-- Text models may learn artifacts of publisher, topic, writing style, or collection period.
-- Exact deduplication does not remove near-duplicates; grouped or time-based evaluation can provide a more demanding generalization test.
-- Future work **with the same classifier** could include hyperparameter tuning, n-gram features, cross-validation, and a small user interface.
-
-## Technology
-
-Python · Pandas · NumPy · Matplotlib · Seaborn · scikit-learn · JupyterLab
-
-## Status
-
-**In progress.** Data exploration, cleaning, TF-IDF transformation, and classifier training have been carried out. Final test metrics, plots, and any interface will be added after evaluation.
+Inspired by the DataFlair tutorial *Detecting Fake News with Python and Machine Learning*. The notebook's data exploration and evaluation reflect this implementation and its own measured results.
