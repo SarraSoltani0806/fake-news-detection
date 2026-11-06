@@ -1,8 +1,6 @@
 # Fake News Detection — Data Science Learning Project
 
-A hands-on **Data Science and Natural Language Processing (NLP)** project exploring text feature extraction, supervised classification, and model evaluation. The goal is to classify articles as `FAKE` or `REAL` using **TF-IDF** features and a single **Passive–Aggressive learning algorithm**.
-
-This is a learning exercise, not a fact-checking service: the classifier learns patterns in the training data and does not verify the truth of an article.
+A hands-on **Data Science ** project exploring text feature extraction, supervised classification, and model evaluation. The goal is to classify articles as `FAKE` or `REAL` using **TF-IDF** features and The **Passive–Aggressive learning algorithm**.
 
 ## Dataset
 
