@@ -88,10 +88,4 @@ The dataset is not included in the repository by default; ensure that you have p
 └── requirements.txt
 ```
 
-## Takeaways and next steps
 
-This exercise covers an end-to-end supervised NLP workflow and illustrates why **error analysis matters more than reporting accuracy alone**. Next steps, while keeping the same single classifier, include inspecting the TF-IDF vocabulary, testing richer text representations (e.g., word n-grams), checking for source or topic shortcuts, and tuning hyperparameters using only the training data.
-
-## Learning resource
-
-Inspired by the DataFlair tutorial *Detecting Fake News with Python and Machine Learning*. The notebook's data exploration and evaluation reflect this implementation and its own measured results.
